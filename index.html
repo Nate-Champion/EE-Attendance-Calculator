@@ -298,8 +298,7 @@
             const classesHeldSoFar = calculateClassesHeld(selectedSubject);
             
             // Adjust total classes if semester is longer than 16 weeks (edge case)
-            // But for now, we assume a fixed 16-week total
-            const finalTotalSemesterClasses = subjectWeeklyCount[selectedSubject]
+            // But for now, we assume a fixed 16-week total 
             
             const attended = Math.round((currentPercentage / 100) * classesHeldSoFar);
             const minRequiredClasses = Math.ceil(finalTotalSemesterClasses * TARGET_PERCENTAGE);
