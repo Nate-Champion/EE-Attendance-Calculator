@@ -277,7 +277,7 @@
                 return;
             }
             const classesHeldSoFar = calculateClassesHeld(selectedSubject);
-            classesHeldInfo.innerHTML = `Based on your schedule, roughly <strong>${classesHeldSoFar}</strong> classes have been held so far.`;
+            classesHeldInfo.innerHTML = `Based on your schedule, exactly <strong>${classesHeldSoFar}</strong> classes have been held so far.`;
         });
 
         calculateBtn.addEventListener('click', () => {
@@ -293,7 +293,8 @@
                 return;
             }
 
-            const totalSemesterClasses = subjectWeeklyCount[selectedSubject]; // This is already multiplied by 16 weeks via logic
+            const finalTotalSemesterClasses = subjectWeeklyCount[selectedSubject] * SEMESTER_WEEKS;
+ // This is already multiplied by 16 weeks via logic
             const classesHeldSoFar = calculateClassesHeld(selectedSubject);
             
             // Adjust total classes if semester is longer than 16 weeks (edge case)
