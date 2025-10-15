@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        :root {
+            --primary-color: #4dabf7;
+            --primary-hover: #339af0;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e9ecef;
+            --text-muted: #adb5bd;
+            --border-color: #495057;
+            --input-bg: #2d2d2d;
+            --success-bg: rgba(40, 167, 69, 0.2);
+            --success-text: #51cf66;
+            --warning-bg: rgba(255, 193, 7, 0.2);
+            --warning-text: #ffd43b;
+            --danger-bg: rgba(220, 53, 69, 0.2);
+            --danger-text: #ff6b6b;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.25);
+        }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: var(--input-bg);
+            color: var(--text-muted);
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            line-height: 20px;
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        .help-icon:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        #classes-held-info {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            display: none; /* Hidden by default */
+        }
+
+        .alert-success { 
+            background-color: var(--success-bg); 
+            color: var(--success-text); 
+            border-left: 4px solid var(--success-text);
+        }
+        
+        .alert-warning { 
+            background-color: var(--warning-bg); 
+            color: var(--warning-text); 
+            border-left: 4px solid var(--warning-text);
+        }
+        
+        .alert-danger { 
+            background-color: var(--danger-bg); 
+            color: var(--danger-text); 
+            border-left: 4px solid var(--danger-text);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            select, input, button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Attendance Calculator</h1>
+        
+        <div class="form-group">
+            <label for="subject-select">Select a Subject:</label>
+            <select id="subject-select">
+                <option value="">-- Please choose a subject --</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="current-percentage">
+                Your Current Attendance (%)
+                <span class="help-icon" id="help-icon">?</span>
+            </label>
+            <input type="number" id="current-percentage" placeholder="e.g., 85" min="0" max="100">
+            <p id="classes-held-info">Total classes held so far will appear here.</p>
+        </div>
+        
+        <button id="calculate-btn">Calculate</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const scheduleData = {
+            "EE": { "1": { "A": { "days": {
+                "Mon": [{"time": "08:00 - 10:40","subject": "APPLICATION OF ICT LAB"}, {"time": "11:10 - 12:00","subject": "CALCULUS AND ANALYTICAL GEOMETRY"}, {"time": "12:05 - 01:50","subject": "LCA (LAB)"}, {"time": "02:40 - 03:30","subject": "LCA (LAB)"}],
+                "Tue": [{"time": "08:00 - 09:45","subject": "LCA THEORY"}, {"time": "09:50 - 10:40","subject": "CALCULUS AND ANALYTICAL GEOMETRY"}, {"time": "11:10 - 12:00","subject": "CALCULUS AND ANALYTICAL GEOMETRY"}, {"time": "12:05 - 01:50","subject": "APPLICATION OF ICT"}],
+                "Wed": [{"time": "08:00 - 09:45","subject": "FUNCTIONAL ENGLISH"}, {"time": "09:50 - 10:40","subject": "APPLIED PHYSICS"}, {"time": "11:10 - 1200","subject": "LCA THEORY"}, {"time": "12:05 - 01:50","subject": "APPLIED PHYSICS LAB"}, {"time": "02:40 - 03:30","subject": "APPLIED PHYSICS LAB"}],
+                "Thu": [{"time": "08:00 - 08:50","subject": "FUNCTIONAL ENGLISH"}, {"time": "08:55 - 09:45","subject": "APPLIED PHYSICS"}, {"time": "12:05 - 01:50","subject": "UNDERSTANDING OF QURAN-I"}, {"time": "02:40 - 03:30","subject": "UNDERSTANDING OF QURAN-I"}],
+                "Fri": [{"time": "08:00 - 10:40","subject": "WORKSHOP PRACTICE LAB"}, {"time": "10:45 - 12:30","subject": "FUNDAMENTALS OF CHEMISTRY"}]
+            }}}}
+        };
+
+        const SEMESTER_WEEKS = 16;
+        const TARGET_PERCENTAGE = 0.75;
+
+        // --- DOM Elements ---
+        const subjectSelect = document.getElementById('subject-select');
+        const percentageInput = document.getElementById('current-percentage');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultDiv = document.getElementById('result');
+        const classesHeldInfo = document.getElementById('classes-held-info');
+        const helpIcon = document.getElementById('help-icon');
+
+        // --- Main Logic ---
+        const subjectWeeklyCount = {};
+
+        // 1. Calculate weekly classes for each subject
+        const days = scheduleData.EE["1"].A.days;
+        for (const day in days) {
+            days[day].forEach(period => {
+                if (period.subject && !period.type) {
+                    subjectWeeklyCount[period.subject] = (subjectWeeklyCount[period.subject] || 0) + 1;
+                }
+            });
+        }
+        
+        // 2. Populate the dropdown
+        const sortedSubjects = Object.keys(subjectWeeklyCount).sort();
+        sortedSubjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject;
+            option.textContent = subject;
+            subjectSelect.appendChild(option);
+        });
+
+        // 3. Calculate weeks passed
+        function getWeeksPassed() {
+            const startDate = new Date('2025-09-08');
+            const currentDate = new Date(); // Uses the actual current date
+            const msInDay = 1000 * 60 * 60 * 24;
+            const daysPassed = Math.floor((currentDate - startDate) / msInDay);
+            return Math.max(1, Math.ceil((daysPassed + 1) / 7)); // Ensure at least 1 week has passed
+        }
+        
+        const weeksPassed = getWeeksPassed();
+
+        // 4. Event Listeners
+        helpIcon.addEventListener('click', () => {
+            alert('You can use Qalam to see your attendance percentage.');
+        });
+        
+        subjectSelect.addEventListener('change', () => {
+            const selectedSubject = subjectSelect.value;
+            resultDiv.style.display = 'none'; // Hide result on new selection
+            if (!selectedSubject) {
+                classesHeldInfo.textContent = 'Total classes held so far will appear here.';
+                return;
+            }
+            const classesPerWeek = subjectWeeklyCount[selectedSubject];
+            const classesHeldSoFar = classesPerWeek * weeksPassed;
+            classesHeldInfo.innerHTML = `Based on your schedule, <strong>${classesHeldSoFar}</strong> classes have been held so far.`;
+        });
+
+        calculateBtn.addEventListener('click', () => {
+            const selectedSubject = subjectSelect.value;
+            const currentPercentage = parseFloat(percentageInput.value);
+
+            if (!selectedSubject) {
+                alert("Please select a subject first.");
+                return;
+            }
+            if (isNaN(currentPercentage) || currentPercentage < 0 || currentPercentage > 100) {
+                alert("Please enter a valid percentage (0-100).");
+                return;
+            }
+
+            // Calculations
+            const classesPerWeek = subjectWeeklyCount[selectedSubject];
+            const totalSemesterClasses = classesPerWeek * SEMESTER_WEEKS;
+            const classesHeldSoFar = classesPerWeek * weeksPassed;
+            const attended = Math.round((currentPercentage / 100) * classesHeldSoFar);
+            
+            const minRequiredClasses = Math.ceil(totalSemesterClasses * TARGET_PERCENTAGE);
+            const remainingClasses = totalSemesterClasses - classesHeldSoFar;
+            const classesStillNeeded = minRequiredClasses - attended;
+
+            // Display Logic
+            let message = '';
+            let alertClass = '';
+
+            if (classesStillNeeded <= 0) {
+                 let safeBunks = 0;
+                 for (let i = 0; i <= remainingClasses; i++) {
+                     const futureAttendance = attended + (remainingClasses - i);
+                     if ((futureAttendance / totalSemesterClasses) >= TARGET_PERCENTAGE) {
+                         safeBunks = i;
+                     } else {
+                         break;
+                     }
+                 }
+                 message = `<strong>You're safe!</strong> You can miss up to <strong>${safeBunks} more classes</strong> and still maintain 75%.`;
+                 alertClass = 'alert-success';
+
+            } else if (classesStillNeeded > remainingClasses) {
+                 message = `<strong>Warning!</strong> It's no longer possible to reach 75%. You need to attend ${classesStillNeeded} more classes, but only ${remainingClasses} are left.`;
+                 alertClass = 'alert-danger';
+
+            } else {
+                const safeBunks = remainingClasses - classesStillNeeded;
+                message = `To reach the 75% goal, you must attend at least <strong>${classesStillNeeded} of the remaining ${remainingClasses} classes</strong>. You can only miss <strong>${safeBunks} more classes</strong> this semester.`;
+                alertClass = 'alert-warning';
+            }
+
+            resultDiv.innerHTML = message;
+            resultDiv.className = alertClass;
+            resultDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
